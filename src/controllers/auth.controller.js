@@ -87,8 +87,22 @@ export const login = async (req, res) => {
 
 export const profile = async (req, res) => {
   try {
-    console.log(req.user);
-    return res.json({ message: "My profile" });
+    const userDoc = await db.collection("users").doc(req.user.id).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userData = userDoc.data();
+
+    const user = {
+      id: userDoc.id,
+      username: userData.username,
+      email: userData.email,
+      role: userData.role,
+    };
+
+    return res.status(200).json(user);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error" });
