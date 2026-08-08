@@ -1,18 +1,25 @@
 import { Router } from "express";
 import {
   getTasks,
+  getTask,
   createTask,
   updateTask,
+  deleteTask,
 } from "../controllers/task.controller.js";
 import validateSchema from "../middlewares/validateSchema.js";
 import { createTaskSchema, updateTaskSchema } from "../schemas/task.schema.js";
+import authRequired from "../middlewares/authRequired.js";
 
 const router = Router();
 
-router.get("/", getTasks);
+router.get("/project/:projectId", authRequired, getTasks);
 
-router.post("/", validateSchema(createTaskSchema), getTasks);
+router.get("/:id", authRequired, getTask);
 
-router.put("/:taskId", validateSchema(updateTaskSchema), getTasks);
+router.post("/", validateSchema(createTaskSchema), authRequired, createTask);
+
+router.put("/:id", validateSchema(updateTaskSchema), authRequired, updateTask);
+
+router.delete("/:id", authRequired, deleteTask);
 
 export default router;
