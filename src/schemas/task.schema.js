@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createTaskSchema = z.object({
   title: z
-    .string({ required_error: "Title is required" })
+    .string({ error: "Title is required" })
     .trim()
     .min(3, "Title must be at least 3 characters long")
     .max(100, "Title must be at most 100 characters long"),
@@ -26,4 +26,12 @@ export const createTaskSchema = z.object({
     .default("medium"),
 });
 
-export const updateTaskSchema = createTaskSchema.partial();
+export const updateTaskSchema = z.object({
+  title: createTaskSchema.shape.title.optional(),
+
+  description: createTaskSchema.shape.description.optional(),
+
+  status: createTaskSchema.shape.status.optional(),
+
+  priority: createTaskSchema.shape.priority.optional(),
+});

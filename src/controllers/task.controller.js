@@ -1,6 +1,7 @@
 import db from "../config/firebase.js";
+import { Timestamp } from "firebase-admin/firestore";
 
-export const getTasks = async (req, res) => {
+export const getTasks = async (req, res, next) => {
   try {
     const { projectId } = req.params;
 
@@ -30,12 +31,11 @@ export const getTasks = async (req, res) => {
 
     return res.status(200).json(tasks);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const getTask = async (req, res) => {
+export const getTask = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -69,14 +69,15 @@ export const getTask = async (req, res) => {
 
     return res.status(200).json(task);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const createTask = async (req, res) => {
+export const createTask = async (req, res, next) => {
   try {
     const { title, description, status, priority, projectId } = req.body;
+    const createdAt = Timestamp.now();
+    const updatedAt = createdAt;
 
     const projectRef = db.collection("projects").doc(projectId);
 
@@ -98,8 +99,8 @@ export const createTask = async (req, res) => {
       status,
       priority,
       projectId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt,
+      updatedAt,
     });
 
     const task = {
@@ -113,12 +114,11 @@ export const createTask = async (req, res) => {
 
     return res.status(201).json(task);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const updateTask = async (req, res) => {
+export const updateTask = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -147,7 +147,7 @@ export const updateTask = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    await taskRef.update({ ...req.body, updatedAt: new Date() });
+    await taskRef.update({ ...req.body, updatedAt: Timestamp.now() });
 
     const updatedTask = await taskRef.get();
 
@@ -156,12 +156,11 @@ export const updateTask = async (req, res) => {
       task: { id: updatedTask.id, ...updatedTask.data() },
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const deleteTask = async (req, res) => {
+export const deleteTask = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -194,7 +193,6 @@ export const deleteTask = async (req, res) => {
 
     return res.json({ message: "Task deleted successfully" });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };

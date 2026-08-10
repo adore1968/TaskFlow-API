@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createProjectSchema = z.object({
   title: z
-    .string({ required_error: "Title is required" })
+    .string({ error: "Title is required" })
     .trim()
     .min(3, "Title must be at least 3 characters long")
     .max(50, "Title must be at most 50 characters long"),

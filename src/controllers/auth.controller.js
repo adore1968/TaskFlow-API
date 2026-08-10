@@ -2,8 +2,9 @@ import db from "../config/firebase.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 import { cookieOptions } from "../utils/cookie.js";
+import { Timestamp } from "firebase-admin/firestore";
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
     const userFound = await db
@@ -12,7 +13,7 @@ export const register = async (req, res) => {
       .get();
 
     if (!userFound.empty) {
-      return res.status(401).json({ message: "Email already registered" });
+      return res.status(409).json({ message: "Email already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -22,14 +23,14 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
       role: "user",
-      createdAt: new Date(),
+      createdAt: Timestamp.now(),
     });
 
     const user = {
       id: userRef.id,
-      username: username,
-      email: email,
-      role: "user",
+      username,
+      email,
+      role,
     };
 
     const token = generateToken({ id: user.id, email: user.email });
@@ -40,12 +41,11 @@ export const register = async (req, res) => {
       .status(201)
       .json({ message: "User registered successfully", user });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const userSnapshot = await db
@@ -80,12 +80,11 @@ export const login = async (req, res) => {
 
     return res.status(200).json({ message: "Login successful", user });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const profile = async (req, res) => {
+export const profile = async (req, res, next) => {
   try {
     const userDoc = await db.collection("users").doc(req.user.id).get();
 
@@ -104,7 +103,19 @@ export const profile = async (req, res) => {
 
     return res.status(200).json(user);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
+  }
+};
+
+export const logout = async (req, res, next) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+    return res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    next(error);
   }
 };

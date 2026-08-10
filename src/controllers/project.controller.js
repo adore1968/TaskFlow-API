@@ -1,6 +1,7 @@
 import db from "../config/firebase.js";
+import { Timestamp } from "firebase-admin/firestore";
 
-export const getProjects = async (req, res) => {
+export const getProjects = async (req, res, next) => {
   try {
     const projectsSnapshot = await db
       .collection("projects")
@@ -14,12 +15,11 @@ export const getProjects = async (req, res) => {
 
     return res.status(200).json(projects);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const getProject = async (req, res) => {
+export const getProject = async (req, res, next) => {
   try {
     const { id } = req.params;
     const projectDoc = await db.collection("projects").doc(id).get();
@@ -41,15 +41,14 @@ export const getProject = async (req, res) => {
 
     return res.status(200).json(project);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const createProject = async (req, res) => {
+export const createProject = async (req, res, next) => {
   try {
     const { title, description, status } = req.body;
-    const createdAt = new Date();
+    const createdAt = Timestamp.now();
     const updatedAt = createdAt;
 
     const projectRef = await db.collection("projects").add({
@@ -75,12 +74,11 @@ export const createProject = async (req, res) => {
       .status(201)
       .json({ message: "Project created successfully", project });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const updateProject = async (req, res) => {
+export const updateProject = async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -100,7 +98,7 @@ export const updateProject = async (req, res) => {
 
     await projectRef.update({
       ...req.body,
-      updatedAt: new Date(),
+      updatedAt: Timestamp.now(),
     });
 
     const updatedProject = await projectRef.get();
@@ -113,12 +111,11 @@ export const updateProject = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
-export const deleteProject = async (req, res) => {
+export const deleteProject = async (req, res, next) => {
   try {
     const { id } = req.params;
     const projectRef = db.collection("projects").doc(id);
@@ -139,7 +136,6 @@ export const deleteProject = async (req, res) => {
 
     return res.status(200).json({ message: "Project deleted successfully" });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
