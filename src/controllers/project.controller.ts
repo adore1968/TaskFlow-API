@@ -1,7 +1,20 @@
-import db from "../config/firebase.js";
 import { Timestamp } from "firebase-admin/firestore";
+import db from "../config/firebase.js";
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import {
+  createProjectSchema,
+  updateProjectSchema,
+} from "../schemas/project.schema.js";
 
-export const getProjects = async (req, res, next) => {
+type CreateProjectBody = z.infer<typeof createProjectSchema>;
+type UpdateProjectBody = z.infer<typeof updateProjectSchema>;
+
+export const getProjects = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const projectsSnapshot = await db
       .collection("projects")
@@ -19,7 +32,11 @@ export const getProjects = async (req, res, next) => {
   }
 };
 
-export const getProject = async (req, res, next) => {
+export const getProject = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const projectDoc = await db.collection("projects").doc(id).get();
@@ -29,6 +46,10 @@ export const getProject = async (req, res, next) => {
     }
 
     const projectData = projectDoc.data();
+
+    if (!projectData) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
     if (projectData.userId !== req.user.id) {
       return res.status(403).json({ message: "Access denied" });
@@ -45,7 +66,11 @@ export const getProject = async (req, res, next) => {
   }
 };
 
-export const createProject = async (req, res, next) => {
+export const createProject = async (
+  req: Request<{}, {}, CreateProjectBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { title, description, status } = req.body;
     const createdAt = Timestamp.now();
@@ -78,7 +103,11 @@ export const createProject = async (req, res, next) => {
   }
 };
 
-export const updateProject = async (req, res, next) => {
+export const updateProject = async (
+  req: Request<{ id: string }, {}, UpdateProjectBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
 
@@ -91,6 +120,10 @@ export const updateProject = async (req, res, next) => {
     }
 
     const projectData = projectDoc.data();
+
+    if (!projectData) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
     if (projectData.userId !== req.user.id) {
       return res.status(403).json({ message: "Access denied" });
@@ -115,7 +148,11 @@ export const updateProject = async (req, res, next) => {
   }
 };
 
-export const deleteProject = async (req, res, next) => {
+export const deleteProject = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const projectRef = db.collection("projects").doc(id);
@@ -127,6 +164,10 @@ export const deleteProject = async (req, res, next) => {
     }
 
     const projectData = projectDoc.data();
+
+    if (!projectData) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
     if (projectData.userId !== req.user.id) {
       return res.status(403).json({ message: "Access denied" });

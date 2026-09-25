@@ -24,6 +24,7 @@ export const createTaskSchema = z.object({
       error: "Invalid task priority",
     })
     .default("medium"),
+  projectId: z.string({ error: "Project ID is required" }),
 });
 
 export const updateTaskSchema = z.object({

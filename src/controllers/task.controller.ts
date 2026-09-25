@@ -1,7 +1,17 @@
-import db from "../config/firebase.js";
 import { Timestamp } from "firebase-admin/firestore";
+import db from "../config/firebase.js";
+import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { createTaskSchema, updateTaskSchema } from "../schemas/task.schema.js";
 
-export const getTasks = async (req, res, next) => {
+type CreateTaskBody = z.infer<typeof createTaskSchema>;
+type UpdateTaskBody = z.infer<typeof updateTaskSchema>;
+
+export const getTasks = async (
+  req: Request<{ projectId: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { projectId } = req.params;
 
@@ -14,6 +24,10 @@ export const getTasks = async (req, res, next) => {
     }
 
     const projectData = projectDoc.data();
+
+    if (!projectData) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
     if (projectData.userId !== req.user.id) {
       return res.status(403).json({ message: "Access denied" });
@@ -35,7 +49,11 @@ export const getTasks = async (req, res, next) => {
   }
 };
 
-export const getTask = async (req, res, next) => {
+export const getTask = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
 
@@ -47,6 +65,10 @@ export const getTask = async (req, res, next) => {
 
     const taskData = taskDoc.data();
 
+    if (!taskData) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
     const projectDoc = await db
       .collection("projects")
       .doc(taskData.projectId)
@@ -57,6 +79,10 @@ export const getTask = async (req, res, next) => {
     }
 
     const projectData = projectDoc.data();
+
+    if (!projectData) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
     if (projectData.userId !== req.user.id) {
       return res.status(403).json({ message: "Access denied" });
@@ -73,7 +99,11 @@ export const getTask = async (req, res, next) => {
   }
 };
 
-export const createTask = async (req, res, next) => {
+export const createTask = async (
+  req: Request<{}, {}, CreateTaskBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { title, description, status, priority, projectId } = req.body;
     const createdAt = Timestamp.now();
@@ -88,6 +118,10 @@ export const createTask = async (req, res, next) => {
     }
 
     const projectData = projectDoc.data();
+
+    if (!projectData) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
     if (projectData.userId !== req.user.id) {
       return res.status(403).json({ message: "Access denied" });
@@ -118,7 +152,11 @@ export const createTask = async (req, res, next) => {
   }
 };
 
-export const updateTask = async (req, res, next) => {
+export const updateTask = async (
+  req: Request<{ id: string }, {}, UpdateTaskBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
 
@@ -132,6 +170,10 @@ export const updateTask = async (req, res, next) => {
 
     const taskData = taskDoc.data();
 
+    if (!taskData) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
     const projectDoc = await db
       .collection("projects")
       .doc(taskData.projectId)
@@ -142,6 +184,10 @@ export const updateTask = async (req, res, next) => {
     }
 
     const projectData = projectDoc.data();
+
+    if (!projectData) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
     if (projectData.userId !== req.user.id) {
       return res.status(403).json({ message: "Access denied" });
@@ -160,7 +206,11 @@ export const updateTask = async (req, res, next) => {
   }
 };
 
-export const deleteTask = async (req, res, next) => {
+export const deleteTask = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
 
@@ -174,6 +224,10 @@ export const deleteTask = async (req, res, next) => {
 
     const taskData = taskDoc.data();
 
+    if (!taskData) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
     const projectDoc = await db
       .collection("projects")
       .doc(taskData.projectId)
@@ -184,6 +238,10 @@ export const deleteTask = async (req, res, next) => {
     }
 
     const projectData = projectDoc.data();
+
+    if (!projectData) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
     if (projectData.userId !== req.user.id) {
       return res.status(403).json({ message: "Access denied" });

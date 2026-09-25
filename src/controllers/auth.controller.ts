@@ -1,10 +1,20 @@
-import db from "../config/firebase.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 import { cookieOptions } from "../utils/cookie.js";
 import { Timestamp } from "firebase-admin/firestore";
+import db from "../config/firebase.js";
+import { z } from "zod";
+import { registerSchema, loginSchema } from "../schemas/auth.schema.js";
+import { NextFunction, Request, Response } from "express";
 
-export const register = async (req, res, next) => {
+type RegisterBody = z.infer<typeof registerSchema>;
+type LoginBody = z.infer<typeof loginSchema>;
+
+export const register = async (
+  req: Request<{}, {}, RegisterBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { username, email, password } = req.body;
     const userFound = await db
@@ -30,7 +40,7 @@ export const register = async (req, res, next) => {
       id: userRef.id,
       username,
       email,
-      role,
+      role: "user",
     };
 
     const token = generateToken({ id: user.id, email: user.email });
@@ -45,7 +55,11 @@ export const register = async (req, res, next) => {
   }
 };
 
-export const login = async (req, res, next) => {
+export const login = async (
+  req: Request<{}, {}, LoginBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { email, password } = req.body;
     const userSnapshot = await db
@@ -84,7 +98,11 @@ export const login = async (req, res, next) => {
   }
 };
 
-export const profile = async (req, res, next) => {
+export const profile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userDoc = await db.collection("users").doc(req.user.id).get();
 
@@ -93,6 +111,10 @@ export const profile = async (req, res, next) => {
     }
 
     const userData = userDoc.data();
+
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     const user = {
       id: userDoc.id,
@@ -107,7 +129,11 @@ export const profile = async (req, res, next) => {
   }
 };
 
-export const logout = async (req, res, next) => {
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
