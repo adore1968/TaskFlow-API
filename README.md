@@ -1,45 +1,47 @@
 # TaskFlow API
 
-REST API para la gestión de proyectos y tareas, desarrollada con **Node.js, Express y Firebase Firestore**.
+REST API para la gestión de proyectos y tareas, desarrollada con **Node.js, Express, TypeScript y Firebase Firestore**.
 
 El proyecto implementa autenticación mediante **JWT almacenado en cookies HTTP-only**, validación de datos con **Zod**, autorización basada en el usuario propietario de cada recurso y un manejo global de errores.
 
 ## 🚀 Tecnologías
 
-- Node.js
-- Express 5
-- Firebase Admin SDK
-- Firebase Firestore
-- JWT
-- bcryptjs
-- Zod
-- Cookie Parser
-- CORS
-- Morgan
-- dotenv
+* Node.js
+* TypeScript
+* Express 5
+* Firebase Admin SDK
+* Firebase Firestore
+* JWT
+* bcryptjs
+* Zod
+* Cookie Parser
+* CORS
+* Morgan
+* dotenv
 
 ## ✨ Características
 
 ### Autenticación
 
-- Registro de usuarios
-- Inicio de sesión
-- Cierre de sesión
-- Consulta del perfil autenticado
-- Contraseñas almacenadas mediante hash con bcrypt
-- Autenticación mediante JWT
-- JWT almacenado en cookie `httpOnly`
-- Middleware de autenticación
+* Registro de usuarios
+* Inicio de sesión
+* Cierre de sesión
+* Consulta del perfil autenticado
+* Contraseñas almacenadas mediante hash con bcrypt
+* Autenticación mediante JWT
+* JWT almacenado en cookie `httpOnly`
+* Middleware de autenticación
+* Tipado de requests, responses y datos mediante TypeScript
 
 ### Proyectos
 
 Cada usuario puede:
 
-- Crear proyectos
-- Obtener sus proyectos
-- Obtener un proyecto específico
-- Actualizar sus proyectos
-- Eliminar sus proyectos
+* Crear proyectos
+* Obtener sus proyectos
+* Obtener un proyecto específico
+* Actualizar sus proyectos
+* Eliminar sus proyectos
 
 ### Tareas
 
@@ -47,11 +49,11 @@ Cada tarea pertenece a un proyecto.
 
 Los usuarios pueden:
 
-- Crear tareas
-- Obtener sus tareas
-- Obtener una tarea específica
-- Actualizar tareas
-- Eliminar tareas
+* Crear tareas
+* Obtener sus tareas
+* Obtener una tarea específica
+* Actualizar tareas
+* Eliminar tareas
 
 Las tareas no pueden modificarse para pertenecer a otro proyecto mediante `updateTask`.
 
@@ -61,16 +63,20 @@ Los datos recibidos por la API son validados mediante **Zod 4**.
 
 Los schemas utilizados son:
 
-- `registerSchema`
-- `loginSchema`
-- `createProjectSchema`
-- `updateProjectSchema`
-- `createTaskSchema`
-- `updateTaskSchema`
+* `registerSchema`
+* `loginSchema`
+* `createProjectSchema`
+* `updateProjectSchema`
+* `createTaskSchema`
+* `updateTaskSchema`
+
+Los tipos de datos utilizados por los controladores y servicios se definen mediante **TypeScript**, utilizando tipos inferidos a partir de los schemas de Zod cuando corresponde.
 
 ### Manejo de errores
 
 La API utiliza un middleware global para centralizar el manejo de errores inesperados.
+
+TypeScript permite tipar los errores, requests, responses, parámetros y datos utilizados dentro de los controladores y middlewares.
 
 ## 📁 Estructura del proyecto
 
@@ -79,38 +85,42 @@ taskflow-api/
 │
 ├── src/
 │   ├── config/
-│   │   └── firebase.js
+│   │   └── firebase.ts
 │   │
 │   ├── controllers/
-│   │   ├── auth.controller.js
-│   │   ├── project.controller.js
-│   │   └── task.controller.js
+│   │   ├── auth.controller.ts
+│   │   ├── project.controller.ts
+│   │   └── task.controller.ts
 │   │
 │   ├── middlewares/
-│   │   ├── authRequired.js
-│   │   ├── errorHandler.js
-│   │   └── validateSchema.js
+│   │   ├── authRequired.ts
+│   │   ├── errorHandler.ts
+│   │   └── validateSchema.ts
 │   │
 │   ├── routes/
-│   │   ├── auth.routes.js
-│   │   ├── project.routes.js
-│   │   └── task.routes.js
+│   │   ├── auth.routes.ts
+│   │   ├── project.routes.ts
+│   │   └── task.routes.ts
 │   │
 │   ├── schemas/
-│   │   ├── auth.schema.js
-│   │   ├── project.schema.js
-│   │   └── task.schema.js
+│   │   ├── auth.schema.ts
+│   │   ├── project.schema.ts
+│   │   └── task.schema.ts
+│   │
+│   ├── types/
+│   │   └── ...
 │   │
 │   ├── utils/
-│   │   └── generateToken.js
+│   │   └── generateToken.ts
 │   │
-│   ├── app.js
-│   └── index.js
+│   ├── app.ts
+│   └── index.ts
 │
 ├── .env.example
 ├── .gitignore
 ├── package.json
 ├── package-lock.json
+├── tsconfig.json
 └── README.md
 ```
 
@@ -158,7 +168,7 @@ src/config/serviceAccountKey.json
 
 Este archivo contiene información sensible y está incluido en `.gitignore`, por lo que **no debe subirse al repositorio**.
 
-El archivo `firebase.js` inicializa Firebase Admin y establece la conexión con Firestore.
+El archivo `firebase.ts` inicializa Firebase Admin y establece la conexión con Firestore.
 
 ## ▶️ Ejecutar el proyecto
 
@@ -186,30 +196,30 @@ http://localhost:3000
 
 | Método | Endpoint             | Auth | Descripción       |
 | ------ | -------------------- | ---- | ----------------- |
-| POST   | `/api/auth/register` | ❌   | Registrar usuario |
-| POST   | `/api/auth/login`    | ❌   | Iniciar sesión    |
-| POST   | `/api/auth/logout`   | ❌   | Cerrar sesión     |
-| GET    | `/api/auth/profile`  | ✅   | Obtener perfil    |
+| POST   | `/api/auth/register` | ❌    | Registrar usuario |
+| POST   | `/api/auth/login`    | ❌    | Iniciar sesión    |
+| POST   | `/api/auth/logout`   | ❌    | Cerrar sesión     |
+| GET    | `/api/auth/profile`  | ✅    | Obtener perfil    |
 
 ### Projects
 
 | Método | Endpoint            | Auth | Descripción                   |
 | ------ | ------------------- | ---- | ----------------------------- |
-| GET    | `/api/projects`     | ✅   | Obtener proyectos del usuario |
-| GET    | `/api/projects/:id` | ✅   | Obtener un proyecto           |
-| POST   | `/api/projects`     | ✅   | Crear proyecto                |
-| PUT    | `/api/projects/:id` | ✅   | Actualizar proyecto           |
-| DELETE | `/api/projects/:id` | ✅   | Eliminar proyecto             |
+| GET    | `/api/projects`     | ✅    | Obtener proyectos del usuario |
+| GET    | `/api/projects/:id` | ✅    | Obtener un proyecto           |
+| POST   | `/api/projects`     | ✅    | Crear proyecto                |
+| PUT    | `/api/projects/:id` | ✅    | Actualizar proyecto           |
+| DELETE | `/api/projects/:id` | ✅    | Eliminar proyecto             |
 
 ### Tasks
 
 | Método | Endpoint         | Auth | Descripción       |
 | ------ | ---------------- | ---- | ----------------- |
-| GET    | `/api/tasks`     | ✅   | Obtener tareas    |
-| GET    | `/api/tasks/:id` | ✅   | Obtener una tarea |
-| POST   | `/api/tasks`     | ✅   | Crear tarea       |
-| PUT    | `/api/tasks/:id` | ✅   | Actualizar tarea  |
-| DELETE | `/api/tasks/:id` | ✅   | Eliminar tarea    |
+| GET    | `/api/tasks`     | ✅    | Obtener tareas    |
+| GET    | `/api/tasks/:id` | ✅    | Obtener una tarea |
+| POST   | `/api/tasks`     | ✅    | Crear tarea       |
+| PUT    | `/api/tasks/:id` | ✅    | Actualizar tarea  |
+| DELETE | `/api/tasks/:id` | ✅    | Eliminar tarea    |
 
 ## 🔑 Autenticación
 
@@ -222,6 +232,8 @@ token
 La cookie está configurada como `httpOnly`, evitando que JavaScript del navegador pueda acceder directamente al token.
 
 Los endpoints protegidos requieren que la cookie de autenticación sea enviada junto con la petición.
+
+TypeScript se utiliza para definir y validar estáticamente la estructura de los datos utilizados en el sistema de autenticación.
 
 ## 📋 Ejemplo de registro
 
@@ -296,28 +308,29 @@ Content-Type: application/json
 
 El proyecto implementa varias medidas de seguridad:
 
-- Contraseñas protegidas con bcrypt
-- JWT firmado mediante una variable de entorno
-- Cookies `httpOnly`
-- Validación de datos con Zod
-- Autorización basada en el propietario del recurso
-- Credenciales de Firebase excluidas de Git
-- Variables sensibles excluidas del repositorio
-- CORS configurado para aceptar únicamente el origen definido
+* Contraseñas protegidas con bcrypt
+* JWT firmado mediante una variable de entorno
+* Cookies `httpOnly`
+* Validación de datos con Zod
+* Autorización basada en el propietario del recurso
+* Credenciales de Firebase excluidas de Git
+* Variables sensibles excluidas del repositorio
+* CORS configurado para aceptar únicamente el origen definido
+* Tipado estático mediante TypeScript
 
 ## 📌 Próximas mejoras
 
 Algunas funcionalidades que podrían agregarse en futuras versiones:
 
-- Refresh tokens
-- Recuperación de contraseña
-- Paginación
-- Filtrado y búsqueda de tareas
-- Ordenamiento por fecha o prioridad
-- Documentación con Swagger / OpenAPI
-- Tests automatizados
-- Rate limiting
+* Refresh tokens
+* Recuperación de contraseña
+* Paginación
+* Filtrado y búsqueda de tareas
+* Ordenamiento por fecha o prioridad
+* Documentación con Swagger / OpenAPI
+* Tests automatizados
+* Rate limiting
 
 ## 👨‍💻 Autor
 
-Desarrollado como proyecto de práctica y portfolio para demostrar conocimientos de desarrollo backend y construcción de APIs REST con Node.js.
+Desarrollado como proyecto de práctica y portfolio para demostrar conocimientos de **desarrollo backend con TypeScript,**
